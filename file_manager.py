@@ -12,12 +12,16 @@ class fileListItem(QListWidgetItem):
     def __init__(self, parent: QListWidgetItem, text_edit: QTextEdit, savable=True, editable=True):
         global open_files
 
+        self.currentHtml = ""
+
         self.path = None
         self.file_name = "Untitled"
         self.savable = savable
 
         self.text_edit = text_edit
         self._editable = editable
+
+        self.parent = parent
 
         if editable:
             self.text_edit.setReadOnly(False)
@@ -30,7 +34,6 @@ class fileListItem(QListWidgetItem):
         super().__init__(icon, self.file_name, parent)
         super().setSizeHint(QSize(32, 32))
         self._unsaved = False
-        self._active = False
 
     def makeUnsaved(self):
         self._unsaved = True
@@ -46,9 +49,10 @@ class fileListItem(QListWidgetItem):
     def open(self, path=None):
         global active
         global ignoreChanges
-        self._active = True
+        ignoreChanges = True
 
-        active = self
+        self.activate()
+
         if not path:
             path, _ = QFileDialog.getOpenFileName(self.text_edit, "Open File", os.path.expanduser(
                 "~/Documents/"), "All Supported File Formats - .html .txt .md(*.html *.txt *.md)")
@@ -65,8 +69,6 @@ class fileListItem(QListWidgetItem):
 
         extension = self.path.split(".")[-1]
 
-        ignoreChanges = True
-
         if extension == "html":
             self.text_edit.setHtml(data)
             print(f"opened file {self.file_name}.{extension} as html")
@@ -82,6 +84,7 @@ class fileListItem(QListWidgetItem):
         if not self.savable:
             print("Opened file can't be saved by the user")
 
+        self.currentHtml = self.text_edit.toHtml()
         ignoreChanges = False
 
     def save(self):
@@ -139,6 +142,28 @@ class fileListItem(QListWidgetItem):
         self.path = filepath
         self.file_name = Path(self.path).stem
         self.makeSaved()
+
+    def deactivate(self):
+        global active
+
+        active = None
+        self.text_edit.setText("")
+        self.text_edit.setReadOnly(True)
+
+    def activate(self):
+        global active
+
+        if "active" in globals() and active is not None:
+            active.deactivate()
+
+        for i in range(self.parent.count()):
+            item = self.parent.item(i)
+            item.setData(Qt.UserRole, None)
+
+        self.setData(Qt.UserRole, "selected")
+
+        active = self
+        self.text_edit.setHtml(self.currentHtml)
 
 
 active: fileListItem

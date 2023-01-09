@@ -30,6 +30,8 @@ class MainWindow(QMainWindow):
         self.dock.setFeatures(QDockWidget.NoDockWidgetFeatures)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dock)
 
+        self.sidebar.itemClicked.connect(lambda: activate())
+
         self.menuBar()
 
         self.openNewFile("./Getting Started.html",
@@ -154,36 +156,32 @@ def quit_app():
 
 
 if __name__ == '__main__':
-    try:
-        app = QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
-        window = MainWindow()
+    window = MainWindow()
 
-        with open('styles/global.qss', 'r') as f:
-            style_sheet = f.read()
-        # Set the global style sheet
-        app.setStyleSheet(style_sheet)
+    with open('styles/global.qss', 'r') as f:
+        style_sheet = f.read()
+    # Set the global style sheet
+    app.setStyleSheet(style_sheet)
 
-        # check if theme is installed
-        if os.path.exists("./themes/theme.qss"):
-            try:
-                with open("./themes/theme.qss", 'r') as f:
-                    user_theme = f.read()
+    # check if theme is installed
+    if os.path.exists("./themes/theme.qss"):
+        try:
+            with open("./themes/theme.qss", 'r') as f:
+                user_theme = f.read()
 
-                if user_theme:
-                    window.setStyleSheet(user_theme)
-                    print("applied custom theme")
-                else:
-                    print("WARNING: Custom theme.qss is blank")
+            if user_theme:
+                window.setStyleSheet(user_theme)
+                print("applied custom theme")
+            else:
+                print("WARNING: Custom theme.qss is blank")
 
-            except Exception as e:
-                print(e)
-                show_custom_exception_popup("Warning", "Failed to load custom theme",
-                                            "check if the theme.qss file is acessible and not used by another program. Press OK to continue.")
+        except Exception as e:
+            print(e)
+            show_custom_exception_popup("Warning", "Failed to load custom theme",
+                                        "check if the theme.qss file is acessible and not used by another program. Press OK to continue.")
 
-        window.resize(1800, 1000)
-        window.show()
-        sys.exit(app.exec_())
-
-    except Exception as e:
-        show_exception_popup(e)
+    window.resize(1800, 1000)
+    window.show()
+    sys.exit(app.exec_())

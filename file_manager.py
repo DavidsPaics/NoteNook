@@ -51,7 +51,7 @@ class fileListItem(QListWidgetItem):
         active = self
         if not path:
             path, _ = QFileDialog.getOpenFileName(self.text_edit, "Open File", os.path.expanduser(
-                "~/Documents/"), "All Supported File Formats - .html .txt .notenook .md(*.html *.txt *.notenook *.md)")
+                "~/Documents/"), "All Supported File Formats - .html .txt .md(*.html *.txt *.md)")
             if not path:
                 print("No file selected")
                 return
@@ -67,7 +67,7 @@ class fileListItem(QListWidgetItem):
 
         ignoreChanges = True
 
-        if extension == "html" or extension == "notenook":
+        if extension == "html":
             self.text_edit.setHtml(data)
             print(f"opened file {self.file_name}.{extension} as html")
         elif extension == "md":
@@ -95,7 +95,7 @@ class fileListItem(QListWidgetItem):
             return
 
         filepath, _ = QFileDialog.getSaveFileName(self.text_edit, "Save File", os.path.expanduser(
-            f"~/Documents/{self.file_name}.notenook"), "All Supported File Formats - .html .txt .notenook .md(*.html *.txt *.notenook *.md)")
+            f"~/Documents/{self.file_name}.html"), "All Supported File Formats - .html .txt .md(*.html *.txt *.md)")
         if not filepath:
             print("No file selected")
             return
@@ -123,7 +123,7 @@ class fileListItem(QListWidgetItem):
                 data = self.text_edit.toPlainText()
                 print("saved as text")
 
-        elif extension == "html" or extension == "notenook":
+        elif extension == "html":
             data = self.text_edit.toHtml()
             print("saved as html")
         elif extension == "md":

@@ -51,14 +51,12 @@ class fileListItem(QListWidgetItem):
         global ignoreChanges
         ignoreChanges = True
 
-        self.activate()
-
         if not path:
             path, _ = QFileDialog.getOpenFileName(self.text_edit, "Open File", os.path.expanduser(
                 "~/Documents/"), "All Supported File Formats - .html .txt .md(*.html *.txt *.md)")
             if not path:
                 print("No file selected")
-                return
+                return False
 
         self.path = path
         with open(self.path, 'r') as f:
@@ -86,6 +84,9 @@ class fileListItem(QListWidgetItem):
 
         self.currentHtml = self.text_edit.toHtml()
         ignoreChanges = False
+        self.activate()
+
+        return True
 
     def save(self):
         if not self.savable:
@@ -144,26 +145,31 @@ class fileListItem(QListWidgetItem):
         self.makeSaved()
 
     def deactivate(self):
+        global ignoreChanges
         global active
+        ignoreChanges = True
 
         active = None
         self.text_edit.setText("")
         self.text_edit.setReadOnly(True)
+        ignoreChanges = False
 
     def activate(self):
+        global ignoreChanges
         global active
+
+        ignoreChanges = True
 
         if "active" in globals() and active is not None:
             active.deactivate()
+            ignoreChanges = True
 
-        for i in range(self.parent.count()):
-            item = self.parent.item(i)
-            item.setData(Qt.UserRole, None)
-
-        self.setData(Qt.UserRole, "selected")
+        self.setSelected(True)
 
         active = self
         self.text_edit.setHtml(self.currentHtml)
+
+        ignoreChanges = False
 
 
 active: fileListItem

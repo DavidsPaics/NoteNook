@@ -3,7 +3,7 @@ import sys
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QTextCursor, QTextCharFormat, QKeySequence, QFont, QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QListWidget, QDockWidget, QMenuBar, QMenu, QAction, QMessageBox, QListWidgetItem
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QListWidget, QDockWidget, QMenuBar, QMenu, QAction, QMessageBox, QListWidgetItem, QAbstractItemView
 from errors import show_exception_popup, show_custom_exception_popup
 import fonts
 import file_manager
@@ -30,7 +30,8 @@ class MainWindow(QMainWindow):
         self.dock.setFeatures(QDockWidget.NoDockWidgetFeatures)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dock)
 
-        self.sidebar.itemClicked.connect(lambda: activate())
+        self.sidebar.itemClicked.connect(lambda item: item.activate())
+        self.sidebar.setSelectionMode(QAbstractItemView.SingleSelection)
 
         self.menuBar()
 
@@ -51,7 +52,7 @@ class MainWindow(QMainWindow):
         open_action.setShortcut(QKeySequence("Ctrl+O"))
         self.file_menu.addAction(open_action)
 
-        save_action = QAction('Open', self)
+        save_action = QAction('Save', self)
         save_action.triggered.connect(self.saveOpenFile)
         save_action.setShortcut(QKeySequence("Ctrl+S"))
         self.file_menu.addAction(save_action)
@@ -109,9 +110,16 @@ class MainWindow(QMainWindow):
             self.sidebar, self.text_edit, savable=savable, editable=editable)
         file.ignoreChanges = True
         if path != None:
-            file.open(path=path)
+            res = file.open(path=path)
         else:
-            file.open()
+            res = file.open()
+
+        if res == False:
+            row = self.sidebar.row(file)
+            self.sidebar.takeItem(row)
+            file.deactivate()
+            return False
+
         self.setWindowTitle(f'{file.getNameAndStar()} - NoteNook')
         file.ignoreChanges = False
 
@@ -126,6 +134,7 @@ class MainWindow(QMainWindow):
 
     def textChanged(self, textEdit: str):
         if file_manager.ignoreChanges:
+            print("ignore changes")
             return
 
         if hasattr(file_manager, "active") and file_manager.active is not None:
@@ -133,11 +142,13 @@ class MainWindow(QMainWindow):
         else:
             return
         if active_file._unsaved == False:
+            print(f"active_file.text is now unsaved")
             active_file.makeUnsaved()
             self.setWindowTitle(f'{active_file.getNameAndStar()} - NoteNook')
 
-        if textEdit[-1] == "/" or textEdit[-1] == "\\":
-            self.slashMenu(textEdit)
+        if len(textEdit) > 0:
+            if textEdit[-1] == "/" or textEdit[-1] == "\\":
+                self.slashMenu(textEdit)
 
     def copy_text(self):
         # Get the selected text and copy it to the clipboard

@@ -1,0 +1,1 @@
+Place a theme.qss file in this folder and restart NoteNook to apply a custom theme

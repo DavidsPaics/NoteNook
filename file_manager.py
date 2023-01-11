@@ -123,6 +123,9 @@ class fileListItem(QListWidgetItem):
         extension = filepath.split(".")[-1]
         print(f"extension: {extension}")
 
+        if not os.path.exists(os.path.dirname(filepath)):
+            os.makedirs(os.path.dirname(filepath))
+
         if extension == "txt":
             # Display warning message
             msg = QMessageBox()
@@ -181,6 +184,11 @@ class fileListItem(QListWidgetItem):
             ignoreChanges = True
 
         self.setSelected(True)
+
+        if self._editable:
+            self.text_edit.setReadOnly(False)
+            self.text_edit.setTextInteractionFlags(
+                Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard | Qt.TextEditorInteraction)
 
         active = self
         self.text_edit.setHtml(self.currentHtml)

@@ -1,5 +1,5 @@
 # Notenook
-## Installing
+## Installation
 ### Dependencies:
 - Python 3
 - PyQt5

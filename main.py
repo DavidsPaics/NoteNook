@@ -4,14 +4,15 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QTextCursor, QTextCharFormat, QKeySequence, QFont, QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QListWidget, QDockWidget, QMenuBar, QMenu, QAction, QMessageBox, QListWidgetItem, QAbstractItemView
-from errors import show_exception_popup, show_custom_exception_popup
+from utils import show_exception_popup, show_custom_exception_popup
 import fonts
 import file_manager
 
 
-def createMenuAction(text: str, parent, function, shortcut=None):
+def createMenuAction(text: str, parent, function, shortcut=None, autoRepeat=False):
     action = QAction(text, parent)
     action.triggered.connect(function)
+    action.setAutoRepeat(autoRepeat)
     if shortcut:
         action.setShortcut(QKeySequence(shortcut))
     return action
@@ -56,6 +57,9 @@ class MainWindow(QMainWindow):
         self.menu_bar.addMenu(self.file_menu)
 
         self.file_menu.addAction(createMenuAction(
+            'New File', self, self.createNewFile, "Ctrl+N"))
+
+        self.file_menu.addAction(createMenuAction(
             'Open', self, self.openNewFile, "Ctrl+O"))
 
         self.file_menu.addAction(createMenuAction(
@@ -92,6 +96,12 @@ class MainWindow(QMainWindow):
         # Create the "Help" menu
         self.help_menu = QMenu('Help')
         self.menu_bar.addMenu(self.help_menu)
+
+    def createNewFile(self):
+        file = file_manager.fileListItem(
+            self.sidebar, self.text_edit, savable=True, editable=True)
+        file.openNewFile()
+        self.setWindowTitle(f'{file.getNameAndStar()} - NoteNook')
 
     def slashMenu(self, text: str):
         pass
@@ -167,9 +177,9 @@ if __name__ == '__main__':
     app.setStyleSheet(style_sheet)
 
     # check if theme is installed
-    if os.path.exists("./themes/theme.qss"):
+    if os.path.exists("./.NoteNook/themes/theme.qss"):
         try:
-            with open("./themes/theme.qss", 'r') as f:
+            with open("./.NoteNook/themes/theme.qss", 'r') as f:
                 user_theme = f.read()
 
             if user_theme:

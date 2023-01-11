@@ -1,4 +1,4 @@
-from errors import show_exception_popup
+from utils import show_exception_popup
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QTextEdit
 

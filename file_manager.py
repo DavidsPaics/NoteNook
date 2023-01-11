@@ -3,7 +3,7 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QListWidgetItem, QListWidget, QTextEdit, QFileDialog, QMessageBox
 from pathlib import Path
-import errors
+import utils
 
 ignoreChanges = False
 
@@ -26,7 +26,7 @@ class fileListItem(QListWidgetItem):
         if editable:
             self.text_edit.setReadOnly(False)
             self.text_edit.setTextInteractionFlags(
-                Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+                Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard | Qt.TextEditorInteraction)
         else:
             self.text_edit.setReadOnly(True)
 
@@ -45,6 +45,22 @@ class fileListItem(QListWidgetItem):
 
     def getNameAndStar(self):
         return "*" + self.file_name if self._unsaved else self.file_name
+
+    def openNewFile(self):
+        global ignoreChanges
+        print("Created new file")
+        ignoreChanges = True
+
+        self.text_edit.setReadOnly(False)
+        self.text_edit.setTextInteractionFlags(
+            Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+
+        self.text_edit.setText("")
+
+        self.currentHtml = self.text_edit.toHtml()
+        self.activate()
+
+        return True
 
     def open(self, path=None):
         global active

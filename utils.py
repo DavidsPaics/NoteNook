@@ -17,3 +17,5 @@ def show_custom_exception_popup(title: str, text: str, info: str):
     msg.setText(text)
     msg.setInformativeText(info)
     msg.exec_()
+
+

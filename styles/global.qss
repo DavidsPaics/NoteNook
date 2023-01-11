@@ -1,0 +1,35 @@
+#note_text_field {
+    font-size: 15pt;
+}
+
+QMainWindow {
+    color: white !important;
+}
+
+QDockWidget {
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+QListWidget {
+    font-size: 12pt;
+
+}
+
+QListWidget::item {
+    vertical-align: center;
+    background-color: transparent;
+    padding-left: 15px;
+}
+
+QListWidget::item:hover {
+    background-color: rgba(255, 255, 255, 0.061);
+}
+
+QListWidget::item:selected {
+    background-color: rgba(255, 255, 255, 0.045);
+}
+
+QListWidget::item:selected::icon {
+    color: white;
+}

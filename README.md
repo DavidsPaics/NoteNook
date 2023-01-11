@@ -10,7 +10,8 @@
 
 2. Install PyQt5 with Pip
     ```
-    pip install PyQt5```
+    pip install PyQt5
+    ```
 3. Run the 'main.py' script
     ```
     python3 main.py

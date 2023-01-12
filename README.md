@@ -30,7 +30,7 @@
     ./dist/NoteNook/NoteNook
     ```
 
-##### The full code to compile from source:
+#### The full code to compile from source and run the app:
 
 ```
 pip install PyQt5

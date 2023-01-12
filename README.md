@@ -2,6 +2,7 @@
 ## Installation
 ### Dependencies:
 - Python 3
+- PyInstaller
 - PyQt5
 - Git (To clone this repository)
 
@@ -13,7 +14,7 @@
 
 2. Install the required dependencies with Pip
     ```
-    pip install PyQt5
+    pip install PyQt5 pyinstaller
     ```
 3. Clone the repository 
     ```
@@ -33,7 +34,7 @@
 #### The full code to compile from source and run the app:
 
 ```
-pip install PyQt5
+pip install PyQt5 pyinstaller
 git clone https://github.com/that-skyfox/NoteNook.git
 cd NoteNook
 sh compile.sh

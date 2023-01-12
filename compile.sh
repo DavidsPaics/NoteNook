@@ -1,0 +1,2 @@
+pyinstaller --noconsole --onedir --add-data "styles/global.qss:styles/" --add-data "./icons/:./icons/" --add-data "./Getting Started.html:./" -n NoteNook --icon "./icons/NoteNookIcon.png" --noconfirm main.py
+echo

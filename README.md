@@ -24,7 +24,7 @@
 
 3. Compile the python code
     ```
-    sh compile.sh
+    pyinstaller --noconsole --onedir --add-data "styles/global.qss:styles/" --add-data "./icons/:./icons/" --add-data "./Getting Started.html:./" -n NoteNook --icon "./icons/NoteNookIcon.png" --noconfirm main.py
     ```
 4. Run the executable
     ```
@@ -37,6 +37,6 @@
 pip install PyQt5 pyinstaller --user
 git clone https://github.com/that-skyfox/NoteNook.git
 cd NoteNook
-sh compile.sh
+pyinstaller --noconsole --onedir --add-data "styles/global.qss:styles/" --add-data "./icons/:./icons/" --add-data "./Getting Started.html:./" -n NoteNook --icon "./icons/NoteNookIcon.png" --noconfirm main.py
 ./dist/NoteNook/NoteNook
 ```

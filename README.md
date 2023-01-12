@@ -32,10 +32,10 @@
 
 ##### The full code to compile from source:
 
-    ```
-    pip install PyQt5
-    git clone https://github.com/that-skyfox/NoteNook.git
-    cd NoteNook
-    sh compile.sh
-    ./dist/NoteNook/NoteNook
-    ```
+```
+pip install PyQt5
+git clone https://github.com/that-skyfox/NoteNook.git
+cd NoteNook
+sh compile.sh
+./dist/NoteNook/NoteNook
+```

@@ -1,4 +1,5 @@
 import os
+import pathlib
 import sys
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
@@ -24,6 +25,7 @@ class MainWindow(QMainWindow):
 
         # Set the window title
         self.setWindowTitle('NoteNook')
+        self.setWindowIcon(QIcon("./icons/NoteNookIcon.png"))
 
         # Create a QTextEdit widget and set it as the central widget
         self.text_edit = QTextEdit()
@@ -142,7 +144,8 @@ class MainWindow(QMainWindow):
         else:
             return
         if active_file._unsaved == False:
-            print(f"active_file.text is now unsaved")
+            print(
+                f"{active_file.file_name} is now unsaved")
             active_file.makeUnsaved()
             self.setWindowTitle(f'{active_file.getNameAndStar()} - NoteNook')
 

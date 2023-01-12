@@ -3,16 +3,39 @@
 ### Dependencies:
 - Python 3
 - PyQt5
+- Git (To clone this repository)
 
-### Linux and macOS:
+### Linux:
+
+#### Compiling from source:
 
 1. Install the latest version of python from [python.org](https://www.python.org)
 
-2. Install PyQt5 with Pip
+2. Install the required dependencies with Pip
     ```
     pip install PyQt5
     ```
-3. Run the 'main.py' script
+3. Clone the repository 
     ```
-    python3 main.py
+    git clone https://github.com/that-skyfox/NoteNook.git
+    cd NoteNook
+    ```
+
+3. Compile the python code
+    ```
+    sh compile.sh
+    ```
+4. Run the executable
+    ```
+    ./dist/NoteNook/NoteNook
+    ```
+
+##### The full code to compile from source:
+
+    ```
+    pip install PyQt5
+    git clone https://github.com/that-skyfox/NoteNook.git
+    cd NoteNook
+    sh compile.sh
+    ./dist/NoteNook/NoteNook
     ```

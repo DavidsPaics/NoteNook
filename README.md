@@ -6,7 +6,7 @@
 - PyQt5
 - Git (To clone this repository)
 
-### Linux:
+### Linux (I tested this only on debian):
 
 #### Compiling from source:
 

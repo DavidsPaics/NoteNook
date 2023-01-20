@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QListWidgetItem, QListWidget, QTextEdit, QFileDialog, QMessageBox
+from PyQt5.QtGui import QIcon, QCursor
+from PyQt5.QtWidgets import QListWidgetItem, QListWidget, QTextEdit, QFileDialog, QMessageBox, QMenu, QInputDialog
 from pathlib import Path
 import utils
 
@@ -22,6 +22,9 @@ class fileListItem(QListWidgetItem):
         self._editable = editable
 
         self.parent = parent
+
+        self.parent.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.parent.customContextMenuRequested.connect(self.show_context_menu)
 
         if editable:
             self.text_edit.setReadOnly(False)
@@ -59,6 +62,7 @@ class fileListItem(QListWidgetItem):
 
         self.currentHtml = self.text_edit.toHtml()
         self.activate()
+        self.makeUnsaved()
 
         return True
 
@@ -107,6 +111,7 @@ class fileListItem(QListWidgetItem):
     def save(self):
         if not self.savable:
             msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
             msg.setText(
                 "This file cannot be saved")
             msg.setWindowTitle("Can't save")
@@ -171,6 +176,7 @@ class fileListItem(QListWidgetItem):
         active = None
         self.text_edit.setText("")
         self.text_edit.setReadOnly(True)
+        self.parent.clearSelection()
         ignoreChanges = False
 
     def activate(self):
@@ -194,6 +200,23 @@ class fileListItem(QListWidgetItem):
         self.text_edit.setHtml(self.currentHtml)
 
         ignoreChanges = False
+
+    def contextMenuEvent(self, event):
+        menu = QMenu()
+        action1 = menu.addAction("Close")
+        action = menu.exec_(QCursor.pos())
+        if action == action1:
+            self.close()
+
+    def show_context_menu(self, pos):
+        index = self.parent.indexAt(pos)
+        if index.row() == self.parent.row(self):
+            self.contextMenuEvent(self.parent.viewport().mapToGlobal(pos))
+
+    def close(self):
+        self.deactivate()
+        self.parent.takeItem(self.parent.row(self))
+        del self
 
 
 active: fileListItem

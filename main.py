@@ -2,12 +2,15 @@ import os
 import pathlib
 import sys
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QRect, QRectF
 from PyQt5.QtGui import QTextCursor, QTextCharFormat, QKeySequence, QFont, QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QListWidget, QDockWidget, QMenuBar, QMenu, QAction, QMessageBox, QListWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QListWidget, QDockWidget, QMenuBar, QMenu, QAction
+from PyQt5.QtWidgets import QLineEdit, QCompleter, QMessageBox, QListWidgetItem, QAbstractItemView, QDesktopWidget
 from utils import show_exception_popup, show_custom_exception_popup
 import fonts
 import file_manager
+import setup
+import search_bar
 
 
 def createMenuAction(text: str, parent, function, shortcut=None, autoRepeat=False):
@@ -19,19 +22,36 @@ def createMenuAction(text: str, parent, function, shortcut=None, autoRepeat=Fals
     return action
 
 
+class mainTextField(QTextEdit):
+    def __init__(self, main_window):
+        self.main_window = main_window
+        self.keyPressEvent = self.key_event
+        super().__init__()
+
+    def key_event(self, event):
+        if event.key() == QtCore.Qt.Key_Slash or event.key() == QtCore.Qt.Key_Backslash:
+            self.main_window.slashMenu()
+        else:
+            super().keyPressEvent(event)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.closeEvent = self.handleCloseEvent
+
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
 
         # Set the window title
         self.setWindowTitle('NoteNook')
         self.setWindowIcon(QIcon("./icons/NoteNookIcon.png"))
 
         # Create a QTextEdit widget and set it as the central widget
-        self.text_edit = QTextEdit()
+        self.text_edit = mainTextField(self)
         self.text_edit.setObjectName("note_text_field")
         self.text_edit.textChanged.connect(
             lambda: self.textChanged(self.text_edit.toPlainText()))
+
         self.setCentralWidget(self.text_edit)
 
         # Create a QListWidget for the sidebar and add it to a QDockWidget
@@ -44,10 +64,12 @@ class MainWindow(QMainWindow):
         self.sidebar.itemClicked.connect(lambda item: item.activate())
         self.sidebar.setSelectionMode(QAbstractItemView.SingleSelection)
 
-        self.menuBar()
-
         self.openNewFile("./Getting Started.html",
                          savable=False, editable=False)
+
+        self.menuBar()
+
+        self.slashMenuWidget = search_bar.SlashMenu(self.text_edit)
 
     def menuBar(self):
         # Create a QMenuBar
@@ -66,6 +88,9 @@ class MainWindow(QMainWindow):
 
         self.file_menu.addAction(createMenuAction(
             'Save', self, self.saveOpenFile, "Ctrl+S"))
+
+        self.file_menu.addAction(createMenuAction(
+            'Close', self, self.closeCurrentFile, "Ctrl+W"))
 
         self.file_menu.addSeparator()
 
@@ -99,14 +124,17 @@ class MainWindow(QMainWindow):
         self.help_menu = QMenu('Help')
         self.menu_bar.addMenu(self.help_menu)
 
+    def closeCurrentFile(self):
+        file_manager.active.close()
+
     def createNewFile(self):
         file = file_manager.fileListItem(
             self.sidebar, self.text_edit, savable=True, editable=True)
         file.openNewFile()
         self.setWindowTitle(f'{file.getNameAndStar()} - NoteNook')
 
-    def slashMenu(self, text: str):
-        pass
+    def slashMenu(self):
+        self.slashMenuWidget.show()
 
     def openNewFile(self, path=None, savable=True, editable=True):
         file = file_manager.fileListItem(
@@ -135,6 +163,11 @@ class MainWindow(QMainWindow):
         file.save()
         self.setWindowTitle(f'{file.getNameAndStar()} - NoteNook')
 
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Slash:
+            self.on_slash_key_pressed()
+        super().keyPressEvent(event)
+
     def textChanged(self, textEdit: str):
         if file_manager.ignoreChanges:
             return
@@ -149,10 +182,6 @@ class MainWindow(QMainWindow):
             active_file.makeUnsaved()
             self.setWindowTitle(f'{active_file.getNameAndStar()} - NoteNook')
 
-        if len(textEdit) > 0:
-            if textEdit[-1] == "/" or textEdit[-1] == "\\":
-                self.slashMenu(textEdit)
-
     def copy_text(self):
         # Get the selected text and copy it to the clipboard
         selected_text = self.text_edit.textCursor().selectedText()
@@ -164,37 +193,42 @@ class MainWindow(QMainWindow):
         clipboard = QApplication.clipboard()
         self.text_edit.insertPlainText(clipboard.text())
 
+    def handleCloseEvent(self, event):
+        unsaved_files = False
+        for i in range(self.sidebar.count()):
+            item = self.sidebar.item(i)
+            if item._unsaved:
+                unsaved_files = True
+                break
+
+        if unsaved_files:
+            # Show a confirmation dialog to the user
+            reply = QMessageBox.question(self, 'Confirm Exit',
+                                         "Are you sure you want to exit without saving?\n\nAny unsaved changes will be lost", QMessageBox.Yes |
+                                         QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                # If the user chooses "Yes", close the app
+                sys.exit()
+            else:
+                # If the user chooses "No", ignore the close event
+                event.ignore()
+
+        else:
+            event.accept()
+
 
 def quit_app():
     sys.exit()
 
 
 if __name__ == '__main__':
+    setup.install_if_needed()
+
     app = QApplication(sys.argv)
 
     window = MainWindow()
 
-    with open('styles/global.qss', 'r') as f:
-        style_sheet = f.read()
-    # Set the global style sheet
-    app.setStyleSheet(style_sheet)
-
-    # check if theme is installed
-    if os.path.exists("./.NoteNook/themes/theme.qss"):
-        try:
-            with open("./.NoteNook/themes/theme.qss", 'r') as f:
-                user_theme = f.read()
-
-            if user_theme:
-                window.setStyleSheet(user_theme)
-                print("applied custom theme")
-            else:
-                print("WARNING: Custom theme.qss is blank")
-
-        except Exception as e:
-            print(e)
-            show_custom_exception_popup("Warning", "Failed to load custom theme",
-                                        "check if the theme.qss file is acessible and not used by another program. Press OK to continue.")
+    setup.load_theme(app)
 
     window.resize(1800, 1000)
     window.show()
